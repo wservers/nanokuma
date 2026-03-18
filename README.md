@@ -8,7 +8,6 @@ Lightweight CI/CD system for WSERVER
 
 <br />
 
-
 ## License
 - **nanokuma** licensed under the General Public License v2.0 or Later. [LICENSE](https://git.wh64.net/wserver/nanokuma/src/branch/master/LICENSES/GPL-2.0-or-later.txt)
 - **shared** lib is under the MIT License. [LICENSE](https://git.wh64.net/wserver/nanokuma/src/branch/master/LICENSES/MIT.txt)
