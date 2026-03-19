@@ -19,9 +19,13 @@ func (m *WebServerModule) RouteAPI(app *gin.Engine) {
 	var api *gin.RouterGroup
 	api = app.Group("/api")
 
+	// Agents
 	api.POST("/agent/check", AgentCheck)
 	api.GET("/agent", AgentGet)
 	api.GET("/agents", AgentQuery)
 	api.PUT("/agent/authorize", AgentAuthorize)
 	api.DELETE("/agent/delete", AgentDelete)
+
+	// Jobs
+	api.POST("/job", JobCreate)
 }

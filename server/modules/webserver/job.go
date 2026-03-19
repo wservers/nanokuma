@@ -11,9 +11,70 @@
 
 package webserver
 
-import "github.com/gin-gonic/gin"
+import (
+	"git.wh64.net/wserver/nanokuma/server/modules/repo"
+	"git.wh64.net/wserver/nanokuma/shared/agent"
+	"git.wh64.net/wserver/nanokuma/shared/job"
+	"github.com/gin-gonic/gin"
+)
 
-func JobCreate(ctx *gin.Context) {}
+func JobCreate(ctx *gin.Context) {
+	var err error
+	var id, agentID string
+	var rp repo.RepoModule
+	var agent *agent.AgentData
+	var payload job.JobPayload
+
+	agentID = ctx.Query("agent_id")
+	if agentID == "" {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "\"agent_id\" query must be contained",
+		})
+		return
+	}
+
+	if repo.Repo == nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "\"repo\" service not served! please contact server administrator.",
+		})
+		return
+	}
+
+	rp = *repo.Repo
+
+	agent, err = rp.GetAgent(id)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to get the agent information",
+		})
+		return
+	}
+
+	if !agent.Authorized {
+		ctx.JSON(403, gin.H{
+			"ok":      0,
+			"message": "the agent is not authorized",
+		})
+		return
+	}
+
+	if err = ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "payload is not json! please send payload for json.",
+		})
+		return
+	}
+
+	if id, err = rp.CreateJob(&payload); err != nil {
+		return
+	}
+
+	ctx.JSON(201, gin.H{"ok": 1, "message": "job created!", "id": id})
+}
 
 func JobRead(ctx *gin.Context) {}
 
