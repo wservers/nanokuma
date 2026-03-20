@@ -83,7 +83,7 @@ func JobRead(ctx *gin.Context) {
 	var rp repo.RepoModule
 	var agent *agent.AgentData
 
-	id = ctx.Query("agent_id")
+	id = ctx.Query("job_id")
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
