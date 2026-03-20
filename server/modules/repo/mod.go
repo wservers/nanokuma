@@ -26,19 +26,19 @@ func (*RepoModule) GetName() string {
 	return "repo"
 }
 
-func (r *RepoModule) Load() error {
+func (m *RepoModule) Load() error {
 	if database.Database == nil {
 		return fmt.Errorf("[repo]: database module is not loaded")
 	}
 
-	r.DB = database.Database.DB
+	m.DB = database.Database.DB
 
 	return nil
 }
 
-func (r *RepoModule) Unload() error {
-	if r.DB != nil {
-		r.DB = nil
+func (m *RepoModule) Unload() error {
+	if m.DB != nil {
+		m.DB = nil
 	}
 
 	return nil

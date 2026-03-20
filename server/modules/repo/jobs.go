@@ -20,7 +20,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *RepoModule) CreateJob(payload *job.JobPayload) (string, error) {
+func (m *RepoModule) CreateJob(payload *job.JobPayload) (string, error) {
 	var err error
 	var id string
 	var query string
@@ -30,7 +30,7 @@ func (r *RepoModule) CreateJob(payload *job.JobPayload) (string, error) {
 
 	query = fmt.Sprintf("INSERT INTO %sjobs (id, repo_url, branch, command, state) VALUES (?, ?, ?, ?, 'queued');", conf.Prefix)
 
-	_, err = r.DB.Exec(query, id, payload.RepoUrl, payload.Branch, payload.Command)
+	_, err = m.DB.Exec(query, id, payload.RepoUrl, payload.Branch, payload.Command)
 	if err != nil {
 		return "", err
 	}
@@ -38,7 +38,7 @@ func (r *RepoModule) CreateJob(payload *job.JobPayload) (string, error) {
 	return id, nil
 }
 
-func (r *RepoModule) GetJob(id string) (*job.Job, error) {
+func (m *RepoModule) GetJob(id string) (*job.Job, error) {
 	var err error
 	var query string
 	var rows *sql.Rows
@@ -53,7 +53,7 @@ func (r *RepoModule) GetJob(id string) (*job.Job, error) {
 		conf.Prefix,
 	)
 
-	rows, err = r.DB.Query(query, id)
+	rows, err = m.DB.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (r *RepoModule) GetJob(id string) (*job.Job, error) {
 	return &data, nil
 }
 
-func (r *RepoModule) GetJobs(projectId string) ([]job.Job, error) {
+func (m *RepoModule) GetJobs(projectId string) ([]job.Job, error) {
 	var err error
 	var query string
 	var rows *sql.Rows
@@ -90,7 +90,7 @@ func (r *RepoModule) GetJobs(projectId string) ([]job.Job, error) {
 		conf.Prefix,
 	)
 
-	rows, err = r.DB.Query(query, projectId)
+	rows, err = m.DB.Query(query, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -114,14 +114,14 @@ func (r *RepoModule) GetJobs(projectId string) ([]job.Job, error) {
 	return jobs, nil
 }
 
-func (r *RepoModule) UpdateJobState(id string, state job.JobState) error {
+func (m *RepoModule) UpdateJobState(id string, state job.JobState) error {
 	var err error
 	var query string
 	var conf = config.Get.Database
 
 	query = fmt.Sprintf("UPDATE %sjobs SET `state` = ? WHERE id = ?;", conf.Prefix)
 
-	_, err = r.DB.Exec(query, state, id)
+	_, err = m.DB.Exec(query, state, id)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (r *RepoModule) UpdateJobState(id string, state job.JobState) error {
 	return nil
 }
 
-func (r *RepoModule) PollingJob(agentId string, timeout int) (*job.Job, error) {
+func (m *RepoModule) PollingJob(agentId string, timeout int) (*job.Job, error) {
 	var err error
 
 	var tx *sql.Tx
@@ -139,7 +139,7 @@ func (r *RepoModule) PollingJob(agentId string, timeout int) (*job.Job, error) {
 
 	var job job.Job
 
-	tx, err = r.DB.Begin()
+	tx, err = m.DB.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -191,14 +191,14 @@ func (r *RepoModule) PollingJob(agentId string, timeout int) (*job.Job, error) {
 	return &job, nil
 }
 
-func (r *RepoModule) DeleteJob(id string) error {
+func (m *RepoModule) DeleteJob(id string) error {
 	var err error
 	var query string
 	var conf = config.Get.Database
 
 	query = fmt.Sprintf("DELETE FROM %sjobs WHERE id = ?;", conf.Prefix)
 
-	_, err = r.DB.Exec(query, id)
+	_, err = m.DB.Exec(query, id)
 	if err != nil {
 		return err
 	}

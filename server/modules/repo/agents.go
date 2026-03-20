@@ -20,7 +20,7 @@ import (
 	"git.wh64.net/wserver/nanokuma/shared/agent"
 )
 
-func (r *RepoModule) UpsertAgent(payload *agent.AgentData) error {
+func (m *RepoModule) UpsertAgent(payload *agent.AgentData) error {
 	var err error
 	var query string
 	var conf = config.Get.Database
@@ -51,7 +51,7 @@ func (r *RepoModule) UpsertAgent(payload *agent.AgentData) error {
 		status = agent.Offline
 	}
 
-	_, err = r.DB.Exec(query,
+	_, err = m.DB.Exec(query,
 		payload.Id, payload.IPAddr, payload.Port, payload.Hostname, status,
 		payload.IPAddr, payload.Port, payload.Hostname, status)
 	if err != nil {
@@ -61,7 +61,7 @@ func (r *RepoModule) UpsertAgent(payload *agent.AgentData) error {
 	return nil
 }
 
-func (r *RepoModule) GetAgent(id string) (*agent.AgentData, error) {
+func (m *RepoModule) GetAgent(id string) (*agent.AgentData, error) {
 	var err error
 	var query string
 	var rows *sql.Rows
@@ -71,7 +71,7 @@ func (r *RepoModule) GetAgent(id string) (*agent.AgentData, error) {
 
 	query = fmt.Sprintf("SELECT id, ip_addr, port, hostname, authorized, `status`, last_action_at FROM %sagents WHERE id = ?;", conf.Prefix)
 
-	rows, err = r.DB.Query(query, id)
+	rows, err = m.DB.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (r *RepoModule) GetAgent(id string) (*agent.AgentData, error) {
 	return &data, err
 }
 
-func (r *RepoModule) GetAgents() ([]agent.AgentData, error) {
+func (m *RepoModule) GetAgents() ([]agent.AgentData, error) {
 	var err error
 	var query string
 	var rows *sql.Rows
@@ -101,7 +101,7 @@ func (r *RepoModule) GetAgents() ([]agent.AgentData, error) {
 
 	query = fmt.Sprintf("SELECT id, ip_addr, port, hostname, authorized, `status`, last_action_at FROM %sagents;", conf.Prefix)
 
-	rows, err = r.DB.Query(query)
+	rows, err = m.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -120,14 +120,14 @@ func (r *RepoModule) GetAgents() ([]agent.AgentData, error) {
 	return agents, nil
 }
 
-func (r *RepoModule) AuthorizeAgent(id string) error {
+func (m *RepoModule) AuthorizeAgent(id string) error {
 	var err error
 	var query string
 	var conf = config.Get.Database
 
 	query = fmt.Sprintf("UPDATE %sagents SET authorized = true WHERE id = ?;", conf.Prefix)
 
-	_, err = r.DB.Exec(query, id)
+	_, err = m.DB.Exec(query, id)
 	if err != nil {
 		return err
 	}
@@ -135,14 +135,14 @@ func (r *RepoModule) AuthorizeAgent(id string) error {
 	return nil
 }
 
-func (r *RepoModule) DeleteAgent(id string) error {
+func (m *RepoModule) DeleteAgent(id string) error {
 	var err error
 	var query string
 	var conf = config.Get.Database
 
 	query = fmt.Sprintf("DELETE FROM %sagents WHERE id = ?;", conf.Prefix)
 
-	_, err = r.DB.Exec(query, id)
+	_, err = m.DB.Exec(query, id)
 	if err != nil {
 		return err
 	}
