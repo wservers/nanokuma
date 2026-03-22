@@ -13,26 +13,15 @@ package webserver
 
 import (
 	"git.wh64.net/wserver/nanokuma/server/modules/repo"
-	"git.wh64.net/wserver/nanokuma/shared/agent"
 	"git.wh64.net/wserver/nanokuma/shared/job"
 	"github.com/gin-gonic/gin"
 )
 
 func JobCreate(ctx *gin.Context) {
 	var err error
-	var id, agentID string
+	var id string
 	var rp repo.RepoModule
-	var agent *agent.AgentData
 	var payload job.JobPayload
-
-	agentID = ctx.Query("agent_id")
-	if agentID == "" {
-		ctx.JSON(400, gin.H{
-			"ok":      0,
-			"message": "\"agent_id\" query must be contained",
-		})
-		return
-	}
 
 	if repo.Repo == nil {
 		ctx.JSON(500, gin.H{
@@ -43,23 +32,6 @@ func JobCreate(ctx *gin.Context) {
 	}
 
 	rp = *repo.Repo
-
-	agent, err = rp.GetAgent(id)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed to get the agent information",
-		})
-		return
-	}
-
-	if !agent.Authorized {
-		ctx.JSON(403, gin.H{
-			"ok":      0,
-			"message": "the agent is not authorized",
-		})
-		return
-	}
 
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(400, gin.H{
@@ -78,25 +50,15 @@ func JobCreate(ctx *gin.Context) {
 
 func JobRead(ctx *gin.Context) {
 	var err error
+	var id string
 	var job *job.Job
-	var id, agentID string
 	var rp repo.RepoModule
-	var agent *agent.AgentData
 
 	id = ctx.Query("job_id")
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	agentID = ctx.Query("agent_id")
-	if agentID == "" {
-		ctx.JSON(400, gin.H{
-			"ok":      0,
-			"message": "\"agent_id\" query must be contained",
 		})
 		return
 	}
@@ -110,23 +72,6 @@ func JobRead(ctx *gin.Context) {
 	}
 
 	rp = *repo.Repo
-
-	agent, err = rp.GetAgent(id)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed to get the agent information",
-		})
-		return
-	}
-
-	if !agent.Authorized {
-		ctx.JSON(403, gin.H{
-			"ok":      0,
-			"message": "the agent is not authorized",
-		})
-		return
-	}
 
 	job, err = rp.GetJob(id)
 	if err != nil {
@@ -147,24 +92,14 @@ func JobRead(ctx *gin.Context) {
 func JobQuery(ctx *gin.Context) {
 	var err error
 	var jobs []job.Job
+	var projectID string
 	var rp repo.RepoModule
-	var agent *agent.AgentData
-	var projectID, agentID string
 
 	projectID = ctx.Query("agent_id")
 	if projectID == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	agentID = ctx.Query("agent_id")
-	if agentID == "" {
-		ctx.JSON(400, gin.H{
-			"ok":      0,
-			"message": "\"agent_id\" query must be contained",
 		})
 		return
 	}
@@ -178,23 +113,6 @@ func JobQuery(ctx *gin.Context) {
 	}
 
 	rp = *repo.Repo
-
-	agent, err = rp.GetAgent(projectID)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed to get the agent information",
-		})
-		return
-	}
-
-	if !agent.Authorized {
-		ctx.JSON(403, gin.H{
-			"ok":      0,
-			"message": "the agent is not authorized",
-		})
-		return
-	}
 
 	jobs, err = rp.GetJobs(projectID)
 	if err != nil {
@@ -222,9 +140,8 @@ func JobQuery(ctx *gin.Context) {
 
 func JobUpdateStatus(ctx *gin.Context) {
 	var err error
-	var id, agentID string
+	var id string
 	var rp repo.RepoModule
-	var agent *agent.AgentData
 	var payload struct {
 		State job.JobState `json:"state" binding:"required"`
 	}
@@ -238,15 +155,6 @@ func JobUpdateStatus(ctx *gin.Context) {
 		return
 	}
 
-	agentID = ctx.Query("agent_id")
-	if agentID == "" {
-		ctx.JSON(400, gin.H{
-			"ok":      0,
-			"message": "\"agent_id\" query must be contained",
-		})
-		return
-	}
-
 	if repo.Repo == nil {
 		ctx.JSON(500, gin.H{
 			"ok":      0,
@@ -256,23 +164,6 @@ func JobUpdateStatus(ctx *gin.Context) {
 	}
 
 	rp = *repo.Repo
-
-	agent, err = rp.GetAgent(id)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed to get the agent information",
-		})
-		return
-	}
-
-	if !agent.Authorized {
-		ctx.JSON(403, gin.H{
-			"ok":      0,
-			"message": "the agent is not authorized",
-		})
-		return
-	}
 
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(400, gin.H{
@@ -298,24 +189,14 @@ func JobUpdateStatus(ctx *gin.Context) {
 
 func JobDelete(ctx *gin.Context) {
 	var err error
-	var id, agentID string
+	var id string
 	var rp repo.RepoModule
-	var agent *agent.AgentData
 
 	id = ctx.Query("job_id")
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	agentID = ctx.Query("agent_id")
-	if agentID == "" {
-		ctx.JSON(400, gin.H{
-			"ok":      0,
-			"message": "\"agent_id\" query must be contained",
 		})
 		return
 	}
@@ -329,23 +210,6 @@ func JobDelete(ctx *gin.Context) {
 	}
 
 	rp = *repo.Repo
-
-	agent, err = rp.GetAgent(id)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed to get the agent information",
-		})
-		return
-	}
-
-	if !agent.Authorized {
-		ctx.JSON(403, gin.H{
-			"ok":      0,
-			"message": "the agent is not authorized",
-		})
-		return
-	}
 
 	err = rp.DeleteJob(id)
 	if err != nil {

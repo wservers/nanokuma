@@ -12,6 +12,7 @@
 package webserver
 
 import (
+	"git.wh64.net/wserver/nanokuma/server/modules/webserver/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,9 +28,9 @@ func (m *WebServerModule) RouteAPI(app *gin.Engine) {
 	api.DELETE("/agent/delete", AgentDelete)
 
 	// Jobs
-	api.POST("/job", JobCreate)
-	api.GET("/job", JobRead)
-	api.GET("/jobs", JobQuery)
-	api.PATCH("/job", JobUpdateStatus)
-	api.DELETE("/job", JobDelete)
+	api.POST("/job", middleware.CheckAgentIsAuthorized(), JobCreate)
+	api.GET("/job", middleware.CheckAgentIsAuthorized(), JobRead)
+	api.GET("/jobs", middleware.CheckAgentIsAuthorized(), JobQuery)
+	api.PATCH("/job", middleware.CheckAgentIsAuthorized(), JobUpdateStatus)
+	api.DELETE("/job", middleware.CheckAgentIsAuthorized(), JobDelete)
 }
