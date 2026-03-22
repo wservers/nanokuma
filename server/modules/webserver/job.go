@@ -220,7 +220,81 @@ func JobQuery(ctx *gin.Context) {
 	})
 }
 
-func JobUpdateStatus(ctx *gin.Context) {}
+func JobUpdateStatus(ctx *gin.Context) {
+	var err error
+	var id, agentID string
+	var rp repo.RepoModule
+	var agent *agent.AgentData
+	var payload struct {
+		State job.JobState `json:"state" binding:"required"`
+	}
+
+	id = ctx.Query("job_id")
+	if id == "" {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "\"job_id\" query must be contained",
+		})
+		return
+	}
+
+	agentID = ctx.Query("agent_id")
+	if agentID == "" {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "\"agent_id\" query must be contained",
+		})
+		return
+	}
+
+	if repo.Repo == nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "\"repo\" service not served! please contact server administrator.",
+		})
+		return
+	}
+
+	rp = *repo.Repo
+
+	agent, err = rp.GetAgent(id)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to get the agent information",
+		})
+		return
+	}
+
+	if !agent.Authorized {
+		ctx.JSON(403, gin.H{
+			"ok":      0,
+			"message": "the agent is not authorized",
+		})
+		return
+	}
+
+	if err = ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "payload is not json! please send payload for json.",
+		})
+		return
+	}
+
+	if err = rp.UpdateJobState(id, payload.State); err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to update job state",
+		})
+	}
+
+	ctx.JSON(200, gin.H{
+		"ok":      1,
+		"message": "success to update job state!",
+		"id":      id,
+	})
+}
 
 func JobDelete(ctx *gin.Context) {
 	var err error
