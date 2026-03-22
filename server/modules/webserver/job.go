@@ -23,14 +23,6 @@ func JobCreate(ctx *gin.Context) {
 	var rp repo.RepoModule
 	var payload job.JobPayload
 
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
-
 	rp = *repo.Repo
 
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
@@ -59,14 +51,6 @@ func JobRead(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
 		})
 		return
 	}
@@ -100,14 +84,6 @@ func JobQuery(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
 		})
 		return
 	}
@@ -155,14 +131,6 @@ func JobUpdateStatus(ctx *gin.Context) {
 		return
 	}
 
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
-
 	rp = *repo.Repo
 
 	if err = ctx.ShouldBindJSON(&payload); err != nil {
@@ -197,14 +165,6 @@ func JobDelete(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"job_id\" query must be contained",
-		})
-		return
-	}
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
 		})
 		return
 	}

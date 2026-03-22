@@ -18,7 +18,7 @@ import (
 
 func (m *WebServerModule) RouteAPI(app *gin.Engine) {
 	var api *gin.RouterGroup
-	api = app.Group("/api")
+	api = app.Group("/api", middleware.CheckRepoIsNil())
 
 	// Agents
 	api.POST("/agent/check", AgentCheck)

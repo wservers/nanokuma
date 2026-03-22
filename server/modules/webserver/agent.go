@@ -25,14 +25,6 @@ func AgentCheck(ctx *gin.Context) {
 	var payload agent.AgentPayload
 	var data agent.AgentData
 
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
-
 	rp = *repo.Repo
 
 	err = ctx.ShouldBindJSON(&payload)
@@ -79,14 +71,6 @@ func AgentGet(ctx *gin.Context) {
 		return
 	}
 
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
-
 	rp = *repo.Repo
 
 	data, err = rp.GetAgent(id)
@@ -105,14 +89,6 @@ func AgentQuery(ctx *gin.Context) {
 	var err error
 	var rp repo.RepoModule
 	var data []agent.AgentData = make([]agent.AgentData, 0)
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
 
 	rp = *repo.Repo
 
@@ -138,14 +114,6 @@ func AgentAuthorize(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"id\" query must be contained",
-		})
-		return
-	}
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
 		})
 		return
 	}
@@ -187,14 +155,6 @@ func AgentDelete(ctx *gin.Context) {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "\"id\" query must be contained",
-		})
-		return
-	}
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
 		})
 		return
 	}
