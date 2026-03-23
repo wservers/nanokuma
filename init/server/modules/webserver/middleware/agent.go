@@ -18,14 +18,6 @@ func CheckAgentIsAuthorized() gin.HandlerFunc {
 			return
 		}
 
-		if repo.Repo == nil {
-			ctx.JSON(500, gin.H{
-				"ok":      0,
-				"message": "\"repo\" service not served! please contact server administrator.",
-			})
-			return
-		}
-
 		rp = *repo.Repo
 
 		agent, err = rp.GetAgent(id)
