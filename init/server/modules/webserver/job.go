@@ -12,18 +12,16 @@
 package webserver
 
 import (
-	"fmt"
-
+	"git.wh64.net/wserver/nanokuma/include/job"
 	"git.wh64.net/wserver/nanokuma/server/modules/repo"
-	"git.wh64.net/wserver/nanokuma/shared/agent"
 	"github.com/gin-gonic/gin"
 )
 
-func AgentCheck(ctx *gin.Context) {
+func JobCreate(ctx *gin.Context) {
 	var err error
+	var id string
 	var rp repo.RepoModule
-	var payload agent.AgentPayload
-	var data agent.AgentData
+	var payload job.JobPayload
 
 	if repo.Repo == nil {
 		ctx.JSON(500, gin.H{
@@ -35,8 +33,7 @@ func AgentCheck(ctx *gin.Context) {
 
 	rp = *repo.Repo
 
-	err = ctx.ShouldBindJSON(&payload)
-	if err != nil {
+	if err = ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
 			"message": "payload is not json! please send payload for json.",
@@ -44,37 +41,24 @@ func AgentCheck(ctx *gin.Context) {
 		return
 	}
 
-	data = agent.AgentData{
-		Id:       payload.Id,
-		IPAddr:   payload.IPAddr,
-		Port:     payload.Port,
-		Hostname: payload.Hostname,
-		Status:   payload.Status,
-	}
-
-	err = rp.UpsertAgent(&data)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "error occurred when checking agent status.",
-		})
+	if id, err = rp.CreateJob(&payload); err != nil {
 		return
 	}
 
-	ctx.JSON(200, gin.H{"ok": 1, "message": "agent upsert detected", "agent_id": payload.Id})
+	ctx.JSON(201, gin.H{"ok": 1, "message": "job created!", "id": id})
 }
 
-func AgentGet(ctx *gin.Context) {
+func JobRead(ctx *gin.Context) {
 	var err error
 	var id string
+	var job *job.Job
 	var rp repo.RepoModule
-	var data *agent.AgentData
 
-	id = ctx.Query("agent_id")
+	id = ctx.Query("job_id")
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"id\" query must be contained",
+			"message": "\"job_id\" query must be contained",
 		})
 		return
 	}
@@ -89,55 +73,33 @@ func AgentGet(ctx *gin.Context) {
 
 	rp = *repo.Repo
 
-	data, err = rp.GetAgent(id)
+	job, err = rp.GetJob(id)
 	if err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to get the job information",
+		})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
 		"ok":      1,
-		"message": "agent data loaded",
-		"data":    *data,
+		"message": "the job found",
+		"data":    job,
 	})
 }
 
-func AgentQuery(ctx *gin.Context) {
+func JobQuery(ctx *gin.Context) {
 	var err error
-	var rp repo.RepoModule
-	var data []agent.AgentData = make([]agent.AgentData, 0)
-
-	if repo.Repo == nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "\"repo\" service not served! please contact server administrator.",
-		})
-		return
-	}
-
-	rp = *repo.Repo
-
-	data, err = rp.GetAgents()
-	if err != nil {
-		return
-	}
-
-	ctx.JSON(200, gin.H{
-		"ok":      1,
-		"message": "all agent data loaded",
-		"data":    data,
-	})
-}
-
-func AgentAuthorize(ctx *gin.Context) {
-	var err error
-	var id string
+	var jobs []job.Job
+	var projectID string
 	var rp repo.RepoModule
 
-	id = ctx.Query("agent_id")
-	if id == "" {
+	projectID = ctx.Query("agent_id")
+	if projectID == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"id\" query must be contained",
+			"message": "\"job_id\" query must be contained",
 		})
 		return
 	}
@@ -152,41 +114,89 @@ func AgentAuthorize(ctx *gin.Context) {
 
 	rp = *repo.Repo
 
-	_, err = rp.GetAgent(id)
+	jobs, err = rp.GetJobs(projectID)
 	if err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to get the job information",
+		})
+		return
+	}
+
+	if len(jobs) == 0 {
 		ctx.JSON(404, gin.H{
 			"ok":      0,
-			"message": "agent data is not found",
-		})
-		return
-	}
-
-	err = rp.AuthorizeAgent(id)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"ok":      0,
-			"message": "failed authorize agent!",
+			"message": "jobs not found by project id " + projectID,
 		})
 		return
 	}
 
 	ctx.JSON(200, gin.H{
 		"ok":      1,
-		"message": "agent authorized!",
+		"message": "the job found",
+		"data":    jobs,
+	})
+}
+
+func JobUpdateStatus(ctx *gin.Context) {
+	var err error
+	var id string
+	var rp repo.RepoModule
+	var payload struct {
+		State job.JobState `json:"state" binding:"required"`
+	}
+
+	id = ctx.Query("job_id")
+	if id == "" {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "\"job_id\" query must be contained",
+		})
+		return
+	}
+
+	if repo.Repo == nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "\"repo\" service not served! please contact server administrator.",
+		})
+		return
+	}
+
+	rp = *repo.Repo
+
+	if err = ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "payload is not json! please send payload for json.",
+		})
+		return
+	}
+
+	if err = rp.UpdateJobState(id, payload.State); err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to update job state",
+		})
+	}
+
+	ctx.JSON(200, gin.H{
+		"ok":      1,
+		"message": "success to update job state!",
 		"id":      id,
 	})
 }
 
-func AgentDelete(ctx *gin.Context) {
+func JobDelete(ctx *gin.Context) {
 	var err error
 	var id string
 	var rp repo.RepoModule
 
-	id = ctx.Query("agent_id")
+	id = ctx.Query("job_id")
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"id\" query must be contained",
+			"message": "\"job_id\" query must be contained",
 		})
 		return
 	}
@@ -201,18 +211,17 @@ func AgentDelete(ctx *gin.Context) {
 
 	rp = *repo.Repo
 
-	err = rp.DeleteAgent(id)
+	err = rp.DeleteJob(id)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"ok":      0,
-			"message": fmt.Sprintf("failed to delete agent id for %s", id),
+			"message": "failed to delete job " + id,
 		})
-		return
 	}
 
 	ctx.JSON(200, gin.H{
 		"ok":      1,
-		"message": "agent deleted",
+		"message": "job deleted",
 		"id":      id,
 	})
 }

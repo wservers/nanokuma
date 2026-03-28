@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"git.wh64.net/wserver/nanokuma/include/agent"
 	"git.wh64.net/wserver/nanokuma/server/modules/repo"
-	"git.wh64.net/wserver/nanokuma/shared/agent"
 	"github.com/gin-gonic/gin"
 )
 

@@ -16,8 +16,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"git.wh64.net/wserver/nanokuma/include/agent"
 	"git.wh64.net/wserver/nanokuma/server/config"
-	"git.wh64.net/wserver/nanokuma/shared/agent"
 )
 
 func (m *RepoModule) UpsertAgent(payload *agent.AgentData) error {

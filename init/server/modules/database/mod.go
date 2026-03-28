@@ -84,7 +84,7 @@ func (m *DatabaseModule) applyMigration(tx *sql.Tx, path, version string) error 
 	var sql string
 
 	if conf.Database.Prefix != "" {
-		prefix = config.Get.Database.Prefix
+		prefix = conf.Database.Prefix
 	}
 
 	fmt.Printf("[database]: loading embedded migration file: %s\n", path)

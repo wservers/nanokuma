@@ -30,13 +30,17 @@ type NanoKuma struct {
 	orders  []string
 	modules map[string]KumaModule
 
+	name string
+
 	Initialized bool
 }
 
-func NewNanoKuma() *NanoKuma {
+func NewNanoKuma(name string) *NanoKuma {
 	return &NanoKuma{
 		orders:  make([]string, 0),
 		modules: make(map[string]KumaModule, 0),
+
+		name: name,
 
 		Initialized: false,
 	}
@@ -60,11 +64,21 @@ func (n *NanoKuma) Init() error {
 	var err error
 
 	if n.Initialized {
-		err = fmt.Errorf("[nanokuma] mininaru core is already loaded")
+		err = fmt.Errorf("[nanokuma] %s core is already loaded", n.name)
 		goto out_handle_error
 	}
 
-	fmt.Printf("Starting nanokuma...\n")
+	fmt.Println()
+	fmt.Println("███╗   ██╗ █████╗ ███╗   ██╗ ██████╗ ██╗  ██╗██╗   ██╗███╗   ███╗ █████╗")
+	fmt.Println("████╗  ██║██╔══██╗████╗  ██║██╔═══██╗██║ ██╔╝██║   ██║████╗ ████║██╔══██╗")
+	fmt.Println("██╔██╗ ██║███████║██╔██╗ ██║██║   ██║█████╔╝ ██║   ██║██╔████╔██║███████║")
+	fmt.Println("██║╚██╗██║██╔══██║██║╚██╗██║██║   ██║██╔═██╗ ██║   ██║██║╚██╔╝██║██╔══██║")
+	fmt.Println("██║ ╚████║██║  ██║██║ ╚████║╚██████╔╝██║  ██╗╚██████╔╝██║ ╚═╝ ██║██║  ██║")
+	fmt.Println("╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝")
+	fmt.Println()
+
+	fmt.Printf("Starting %s...\n", n.name)
+
 	n.Lock()
 
 	for _, name := range n.orders {
@@ -92,10 +106,10 @@ out_handle_error:
 func (n *NanoKuma) Destroy() error {
 	var err error
 	if !n.Initialized {
-		return fmt.Errorf("[mininaru]: nanokuma core's state is already dead")
+		return fmt.Errorf("[mininaru]: %s core's state is already dead", n.name)
 	}
 
-	fmt.Printf("[nanokuma]: Shutting down nanokuma...\n")
+	fmt.Printf("[nanokuma]: Shutting down %s...\n", n.name)
 	slices.Reverse(n.orders)
 	n.Lock()
 

@@ -17,8 +17,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"git.wh64.net/wserver/nanokuma/server/config"
-	"git.wh64.net/wserver/nanokuma/server/core"
+	"git.wh64.net/wserver/config"
+	"git.wh64.net/wserver/nanokuma/core"
+	cnf "git.wh64.net/wserver/nanokuma/server/config"
 	"git.wh64.net/wserver/nanokuma/server/modules/database"
 	"git.wh64.net/wserver/nanokuma/server/modules/webserver"
 )
@@ -28,13 +29,13 @@ func main() {
 	var kuma *core.NanoKuma
 	var quit chan os.Signal
 
-	err = config.Load()
+	err = config.Load(cnf.CONFIG_PATH, &cnf.Get, cnf.DefaultConfig)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
 	}
 
-	kuma = core.NewNanoKuma()
+	kuma = core.NewNanoKuma("NanoKuma")
 
 	kuma.AddModule(database.Database)
 	kuma.AddModule(webserver.WebServer)
@@ -51,6 +52,11 @@ func main() {
 	<-quit
 
 	err = kuma.Destroy()
+	if err != nil {
+		return
+	}
+
+	err = config.Unload(&cnf.Get)
 	if err != nil {
 		return
 	}

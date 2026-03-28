@@ -4,7 +4,7 @@
 CC = go
 MAIN = main.go
 SRCS = $(shell find . -name '*.go')
-TARGET = ../nanokuma
+TARGET = ../../nanokuma
 
 VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo "0.0.0")
 BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
