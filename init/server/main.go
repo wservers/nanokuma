@@ -35,7 +35,7 @@ func main() {
 		return
 	}
 
-	kuma = core.NewNanoKuma()
+	kuma = core.NewNanoKuma("NanoKuma")
 
 	kuma.AddModule(database.Database)
 	kuma.AddModule(webserver.WebServer)
