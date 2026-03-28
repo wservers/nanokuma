@@ -11,13 +11,6 @@
 
 package config
 
-import (
-	"fmt"
-	"os"
-
-	"github.com/pelletier/go-toml/v2"
-)
-
 type SSLConfig struct {
 	Enable   bool   `toml:"enable"`
 	KeyFile  string `toml:"key_file"`
@@ -33,19 +26,18 @@ type DatabaseConfig struct {
 	Prefix   string `toml:"prefix"`
 }
 
-type RawConfig struct {
+type ServerConfig struct {
 	Host     string         `toml:"host"`
 	Port     int            `toml:"port"`
 	SSL      SSLConfig      `toml:"ssl"`
 	Database DatabaseConfig `toml:"database"`
 }
 
-const CONFIG_PATH = "config.toml"
+const CONFIG_PATH string = "config.toml"
 
 var (
-	Get *RawConfig
-
-	DefaultConfig RawConfig = RawConfig{
+	Get           ServerConfig = ServerConfig{}
+	DefaultConfig ServerConfig = ServerConfig{
 		Host: "localhost",
 		Port: 8080,
 		SSL: SSLConfig{
@@ -61,41 +53,3 @@ var (
 		},
 	}
 )
-
-func Load() error {
-	var err error
-	var buf []byte
-	var raw []byte
-	var data RawConfig
-
-	buf, err = os.ReadFile(CONFIG_PATH)
-	if err != nil {
-		fmt.Printf("[nanokuma]: config.toml is not exists, creating new config file...\n")
-		raw, err = toml.Marshal(&DefaultConfig)
-		if err != nil {
-			return err
-		}
-
-		err = os.WriteFile(CONFIG_PATH, raw, 0600)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = toml.Unmarshal(buf, &data)
-	if err != nil {
-		return err
-	}
-
-	Get = &data
-
-	return nil
-}
-
-func Unload() error {
-	if Get != nil {
-		Get = nil
-	}
-
-	return nil
-}

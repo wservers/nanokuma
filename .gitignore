@@ -7,10 +7,11 @@
 dist/
 
 config.toml
-!config.sample.toml
+agent-config.toml
 
 # binaries
 nanokuma
+nanokuma-agent
 
 # macOS file cache
 .DS_Store

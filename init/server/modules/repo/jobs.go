@@ -15,8 +15,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	"git.wh64.net/wserver/nanokuma/include/job"
 	"git.wh64.net/wserver/nanokuma/server/config"
-	"git.wh64.net/wserver/nanokuma/shared/job"
 	"github.com/google/uuid"
 )
 
