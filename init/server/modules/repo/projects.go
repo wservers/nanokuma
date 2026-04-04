@@ -67,6 +67,35 @@ func (m *RepoModule) GetProject(id string) (*project.Project, error) {
 	return &data, nil
 }
 
+func (m *RepoModule) GetProjectByRepoURL(repoURL string) (*project.Project, error) {
+	var err error
+	var query string
+	var rows *sql.Rows
+	var data project.Project
+	var conf = config.Get.Database
+
+	query = fmt.Sprintf("SELECT id, repo_url, created_at, updated_at FROM %sprojects WHERE repo_url = ?;", conf.Prefix)
+
+	rows, err = m.DB.Query(query, repoURL)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	if !rows.Next() {
+		err = fmt.Errorf("project repo_url '%s' is not exists", repoURL)
+		return nil, err
+	}
+
+	err = rows.Scan(&data.ID, &data.RepoURL, &data.CreatedAt, &data.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &data, nil
+}
+
 func (m *RepoModule) UpdateProjectRepoURL(id string, repoURL string) error {
 	var err error
 	var query string

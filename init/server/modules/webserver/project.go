@@ -45,7 +45,7 @@ func ProjectRead(ctx *gin.Context) {
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"job_id\" query must be contained",
+			"message": "\"project_id\" query must be contained",
 		})
 		return
 	}
@@ -53,6 +53,39 @@ func ProjectRead(ctx *gin.Context) {
 	rp = *repo.Repo
 
 	project, err = rp.GetProject(id)
+	if err != nil {
+		ctx.JSON(500, gin.H{
+			"ok":      0,
+			"message": "failed to get the project information.",
+		})
+		return
+	}
+
+	ctx.JSON(200, gin.H{
+		"ok":      1,
+		"message": "the project found",
+		"data":    project,
+	})
+}
+
+func ProjectReadByRepoURL(ctx *gin.Context) {
+	var err error
+	var repoURL string
+	var rp repo.RepoModule
+	var project *project.Project
+
+	repoURL = ctx.Query("repo_url")
+	if repoURL == "" {
+		ctx.JSON(400, gin.H{
+			"ok":      0,
+			"message": "\"repo_url\" query must be contained",
+		})
+		return
+	}
+
+	rp = *repo.Repo
+
+	project, err = rp.GetProjectByRepoURL(repoURL)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"ok":      0,
@@ -78,7 +111,7 @@ func ProjectUpdateRepoURL(ctx *gin.Context) {
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"job_id\" query must be contained",
+			"message": "\"project_id\" query must be contained",
 		})
 		return
 	}
@@ -104,7 +137,7 @@ func ProjectDelete(ctx *gin.Context) {
 	if id == "" {
 		ctx.JSON(400, gin.H{
 			"ok":      0,
-			"message": "\"job_id\" query must be contained",
+			"message": "\"project_id\" query must be contained",
 		})
 		return
 	}
